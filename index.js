@@ -57,6 +57,29 @@ async function run() {
       res.send(result);
   })
 
+  app.put('/allToys/:id', async(req, res) =>{
+    const id = req.params.id;
+    const filter = {_id: new ObjectId(id)}
+    const options = { upsert: true };
+    const updateToy =req.body;
+    const toy = {
+      $set:{
+        name: updateToy.name,
+        seller: updateToy.seller,
+        email: updateToy.email,
+        quantity: updateToy.quantity,
+        price: updateToy.price,
+        subCategory: updateToy.subCategory,
+        details: updateToy.details,
+        photo: updateToy.photo,
+        rating: updateToy.rating
+      }
+    }
+
+    const result = await toyCollection.updateOne(filter, toy, options)
+    res.send(result);
+  })
+
 
 
     // Send a ping to confirm a successful connection
