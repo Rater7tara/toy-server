@@ -28,13 +28,41 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const toyCollection =client.db('toyDB').collection('allToys');
+    const toyCollection = client.db('toyDB').collection('allToys');
 
-    app.get('/allToys', async(req, res) =>{
-      const cursor = toyCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    })
+    app.get('/allToys', async (req, res) => {
+
+      const { category, sort, limit, email } = req.query;
+
+      let query = toyCollection.find();
+
+      if (category) {
+          query = query.filter({ category });
+      }
+
+      if (email) {
+          query = query.filter({ email: email });
+        }
+
+      if (sort === 'asc') {
+          query = query.sort({ price: 1 });
+      } else if (sort === 'desc') {
+          query = query.sort({ price: -1 });
+      }
+
+      if (limit) {
+          const limitValue = parseInt(limit);
+          query = query.limit(limitValue);
+      }
+
+      try {
+          const products = await query.toArray();
+          res.send(products);
+      } catch (err) {
+          console.error('Failed to fetch products:', err);
+          res.status(500).send('Internal Server Error');
+      }
+  })
 
     app.get('/allToys/:id', async(req, res) => {
       const id = req.params.id;
@@ -42,6 +70,8 @@ async function run() {
       const result = await toyCollection.findOne(query);
       res.send(result);
   })
+
+
 
     app.post('/allToys', async(req, res) =>{
       const newToy = req.body;
