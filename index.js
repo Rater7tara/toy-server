@@ -32,7 +32,7 @@ async function run() {
 
     app.get('/allToys', async (req, res) => {
 
-      const { category, sort, limit, email } = req.query;
+      const { category, email } = req.query;
 
       let query = toyCollection.find();
 
@@ -44,20 +44,9 @@ async function run() {
           query = query.filter({ email: email });
         }
 
-      if (sort === 'asc') {
-          query = query.sort({ price: 1 });
-      } else if (sort === 'desc') {
-          query = query.sort({ price: -1 });
-      }
-
-      if (limit) {
-          const limitValue = parseInt(limit);
-          query = query.limit(limitValue);
-      }
-
       try {
-          const products = await query.toArray();
-          res.send(products);
+          const toyProduct = await query.toArray();
+          res.send(toyProduct);
       } catch (err) {
           console.error('Failed to fetch products:', err);
           res.status(500).send('Internal Server Error');
