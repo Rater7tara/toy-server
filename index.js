@@ -32,17 +32,13 @@ async function run() {
 
     app.get('/allToys', async (req, res) => {
 
-      const { category, email } = req.query;
+      const { category } = req.query;
 
       let query = toyCollection.find();
 
       if (category) {
           query = query.filter({ category });
       }
-
-      if (email) {
-          query = query.filter({ email: email });
-        }
 
       try {
           const toyProduct = await query.toArray();
@@ -51,6 +47,23 @@ async function run() {
           console.error('Failed to fetch products:', err);
           res.status(500).send('Internal Server Error');
       }
+  })
+
+  app.get('/allToys', async (req, res) =>{
+    console.log(req.query.email)
+    const sort = req.query.sort;
+    let query = {};
+    const options = {
+      sort: {
+        "price": sort === 'asc' ? 1 : -1
+      }
+
+    };
+    if(req.query?.email){
+      query = {email: req.query.email}
+    }
+    const result = await toyCollection.find(query, options).toArray();
+    res.send(result)
   })
 
     app.get('/allToys/:id', async(req, res) => {
