@@ -32,12 +32,15 @@ async function run() {
 
     app.get('/allToys', async (req, res) => {
 
-      const { category } = req.query;
+      const { category, email } = req.query;
 
       let query = toyCollection.find();
 
       if (category) {
           query = query.filter({ category });
+      }
+      if (email){
+        query = query.filter({email : email});
       }
 
       try {
@@ -51,6 +54,15 @@ async function run() {
 
   app.get('/allToys', async (req, res) =>{
     console.log(req.query.email)
+    let query = {};
+    if(req.query?.email){
+      query = {email: req.query.email}
+    }
+    const result = await toyCollection.find(query).toArray();
+    res.send(result)
+  })
+
+  app.get('/allToys', async (req, res) =>{
     const sort = req.query.sort;
     let query = {};
     const options = {
@@ -59,10 +71,19 @@ async function run() {
       }
 
     };
-    if(req.query?.email){
-      query = {email: req.query.email}
-    }
-    const result = await toyCollection.find(query, options).toArray();
+    
+    const result = await toyCollection.find(options).toArray();
+    res.send(result)
+  });
+
+  app.get('/search/:text', async (req, res) =>{
+    const searchText = req.params.text;
+    const result = await toyCollection.find({
+      $or:[
+        {name:{$regex:searchText, $options:"i"}},
+        {category:{$regex:searchText, $options:"i"}}
+      ]
+    }).toArray();
     res.send(result)
   })
 
